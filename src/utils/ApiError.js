@@ -1,5 +1,5 @@
 class ApiError extends Error {
-    cosnstructure(
+    constructor(
         statusCode,
         message= "Something went wrong",
         errors= [],
@@ -15,7 +15,7 @@ class ApiError extends Error {
         if (stack) {
             this.stack = stack;
         } else {
-            Error.captureStackTrace(this, this.cosnstructor);
+            Error.captureStackTrace(this, this.constructor);
         }
     }
 }
