@@ -51,13 +51,13 @@ const userSchema = new Schema({
     }
 );
 
+//this fn is to encrypt password just before saving
 // dont use arrow fun as callback fn, coz bcrypt needs this. for referencing password, and using async because encryption takes time, use next since its middleware
 userSchema.pre("save", async function(next) {
    //this if ensures that password is only encrypted when the password is updated/changed/saved, otherwise password will keep getting encrypted every time user updated anything in user schema
+    if(!this.isModified("password")) return next();
 
-    if(this.isModified("password")) return next();
-
-    this.password = bcrypt.hash(this.password, 10);
+    this.password = await bcrypt.hash(this.password, 10);
     next();
 } );
 
