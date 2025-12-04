@@ -276,10 +276,11 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 
     //improve this
     if( !fullName || !email ){
-        throw new error(400, "all fields are required");
+        throw new ApiError(400, "all fields are required");
     }
 
-    const user = User.findByIdAndUpdate(req.user?._id,
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,
         {
             $set: {
                 fullName,
@@ -292,7 +293,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     return res
     .status(200)
     .json(
-        ApiResponse(
+        new ApiResponse(
             200,
             user,
             "Account details updated successfully."
@@ -486,6 +487,20 @@ const getWatchHistory = asyncHandler(async (req, res) => {
             }
         }
     ])
+
+    if(!user?.length){
+        throw new ApiError(404, "user does not exist");
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            user,
+            "watch history fetched successfully."
+        )
+    )
 })
 
 
