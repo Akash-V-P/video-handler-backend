@@ -1,10 +1,10 @@
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from "../utils/ApiError.js"
-import { User } from '../models/user.model.js';
-import { uploadOnCloudinary } from '../utils/cloudinary.js';
 import { ApiResponse } from '../utils/ApiResponse.js'
-import jwt from "jsonwebtoken";
+import { uploadOnCloudinary } from '../utils/cloudinary.js';
 import mongoose from 'mongoose';
+import jwt from "jsonwebtoken";
+import { User } from '../models/user.model.js';
 
 
 const generateAccessAndRefreshTokens = async (userId) => {
@@ -22,6 +22,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
         throw new ApiError(500, "Something went wrong while generating access and refresh token");
     }
 }
+
 
 const registerUser = asyncHandler(async (req, res) => {
 
@@ -81,7 +82,7 @@ const registerUser = asyncHandler(async (req, res) => {
         }
     )
 
-    const createdUser = await User.findById(user._id).select("-password -refreshToken")
+    const createdUser = await User.findById(user?._id).select("-password -refreshToken")
 
     if (!createdUser) {
         throw new ApiError(500, "Could'nt regester user")
@@ -501,8 +502,6 @@ const getWatchHistory = asyncHandler(async (req, res) => {
         )
     )
 })
-
-
 
 
 export { registerUser, loginUser, logoutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails, updateUserAvatar, updateUserCoverImage, getUserChannelProfile, getWatchHistory };
