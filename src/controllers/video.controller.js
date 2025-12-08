@@ -200,8 +200,7 @@ const getVideoById = asyncHandler(async (req, res) => {
 
 const getAllVideos = asyncHandler(async (req, res) => {
     const userId = req.user._id;
-    const page = req.query.page || 1;
-    const limit = req.query.limit || 10;
+    const { page = 1, limit = 10 } = req.query
 
     if (!userId) {
         throw new ApiError(400, "user Id is required.");
