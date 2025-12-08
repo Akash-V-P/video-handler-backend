@@ -1,0 +1,274 @@
+import mongoose, { isValidObjectId } from "mongoose"
+import { Like } from "../models/like.model.js"
+import { ApiError } from "../utils/ApiError.js"
+import { ApiResponse } from "../utils/ApiResponse.js"
+import { asyncHandler } from "../utils/asyncHandler.js"
+
+const toggleVideoLike = asyncHandler(async (req, res) => {
+    const { videoId } = req.params
+
+    if (!videoId) {
+        throw new ApiError(400, "video id is required");
+    }
+
+    const likedVideo = await Like.find(
+        {
+            videoId,
+            likedBy: req.user?._id
+        }
+    )
+
+    if (likedVideo) {
+
+        const unlike = await Like.findByIdAndDelete(
+            {
+                videoId,
+                likedBy: req.user?._id
+            }
+        )
+
+        if (!unlike) {
+            throw new ApiError(500, "could not unlike the video")
+        }
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    unlike,
+                    "unliked the video successfully"
+                )
+            )
+    }
+    else {
+
+        const like = await Like.create(
+            {
+                videoId,
+                likedBy: req.user?._id
+            }
+        )
+
+        if (!like) {
+            throw new ApiError(500, "could not like the video")
+        }
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    like,
+                    "successfully like the video"
+                )
+            )
+    }
+
+
+})
+
+const toggleCommentLike = asyncHandler(async (req, res) => {
+    const { commentId } = req.params
+
+    if (!commentId) {
+        throw new ApiError(400, "comment id is required");
+    }
+
+    const likedComment = await Like.find(
+        {
+            commentId,
+            likedBy: req.user?._id
+        }
+    )
+
+    if (likedComment) {
+
+        const unlike = await Like.findByIdAndDelete(
+            {
+                commentId,
+                likedBy: req.user?._id
+            }
+        )
+
+        if (!unlike) {
+            throw new ApiError(500, "could not unlike the comment")
+        }
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    unlike,
+                    "unliked the comment successfully"
+                )
+            )
+    }
+    else {
+
+        const like = await Like.create(
+            {
+                commentId,
+                likedBy: req.user?._id
+            }
+        )
+
+        if (!like) {
+            throw new ApiError(500, "could not like the commnet")
+        }
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    like,
+                    "successfully like the comment"
+                )
+            )
+    }
+
+})
+
+const toggleTweetLike = asyncHandler(async (req, res) => {
+    const { tweetId } = req.params
+
+    if (!tweetId) {
+        throw new ApiError(400, "tweet id is required");
+    }
+
+    const likedTweet = await Like.find(
+        {
+            tweetId,
+            likedBy: req.user?._id
+        }
+    )
+
+    if (likedTweet) {
+
+        const unlike = await Like.findByIdAndDelete(
+            {
+                tweetId,
+                likedBy: req.user?._id
+            }
+        )
+
+        if (!unlike) {
+            throw new ApiError(500, "could not unlike the tweet")
+        }
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    unlike,
+                    "unliked the tweet successfully"
+                )
+            )
+    }
+    else {
+
+        const like = await Like.create(
+            {
+                tweetId,
+                likedBy: req.user?._id
+            }
+        )
+
+        if (!like) {
+            throw new ApiError(500, "could not like the tweet")
+        }
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    like,
+                    "successfully like the tweet"
+                )
+            )
+    }
+}
+)
+
+const getLikedVideos = asyncHandler(async (req, res) => {
+    const userId = req.user?._id;
+
+    const likedVideos = await Like.aggregate(
+        [
+            {
+                $match: {
+                    likedBy: new mongoose.Types.ObjectId(userId)
+                }
+            },
+            {
+                $lookup: {
+                    from: "videos",
+                    localField: "video",
+                    foreignField: "_id",
+                    as: "video",
+                    pipeline: [
+                        {
+                            $lookup: {
+                                from: "users",
+                                localField: "owner",
+                                foreignField: "_id",
+                                as: "owner",
+                                pipeline: [
+                                    {
+                                        $project: {
+                                            username: 1,
+                                            fullName: 1,
+                                            avatar: 1
+                                        }
+                                    }
+                                ]
+                            }
+
+                        },
+                        {
+                            $addFields: {
+                                owner: {
+                                    $first: "$owner"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                $addFields: {
+                    video: {
+                        $first: "$video"
+                    }
+                }
+            },
+            {
+                $project: {
+                    video: 1,
+                    likedBy: 1
+                }
+            }
+        ]
+    )
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                likedVideos,
+                "liked videos fetched successfully"
+            )
+        )
+})
+
+export {
+    toggleCommentLike,
+    toggleTweetLike,
+    toggleVideoLike,
+    getLikedVideos
+}
