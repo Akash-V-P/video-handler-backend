@@ -1,6 +1,5 @@
 import mongoose from "mongoose"
 import { Video } from "../models/video.model.js"
-import { Subscription } from "../models/subscription.model.js"
 import { Like } from "../models/like.model.js"
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
@@ -8,7 +7,7 @@ import { asyncHandler } from "../utils/asyncHandler.js"
 import { Tweet } from "../models/tweet.model.js"
 import { Book } from "../models/book.model.js"
 import { View } from "../models/view.model.js"
-import e from "express"
+
 
 const getChannelStats = asyncHandler(async (req, res) => {
     const { channelId } = req.params;
@@ -279,14 +278,14 @@ const getChannelStats = asyncHandler(async (req, res) => {
     }
 
     return res
-    .status(200 )
-    .json(
-        new ApiResponse(
-           200,
-           stats,
-           "channel stats fetched successfully"
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                stats,
+                "channel stats fetched successfully"
+            )
         )
-    )
 })
 
 const getChannelVideos = asyncHandler(async (req, res) => {
@@ -309,7 +308,49 @@ const getChannelVideos = asyncHandler(async (req, res) => {
         )
 })
 
+const getChannelBooks = asyncHandler(async (req, res) => {
+    const { channelId } = req.params;
+
+    if (!mongoose.isValidObjectId(channelId)) {
+        throw new ApiError(400, "Invalid channel id");
+    }
+
+    const books = await Book.find({ uploadedBy: channelId });
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                books,
+                "Channel books fetched successfully"
+            )
+        )
+})
+
+const getChannelTweets = asyncHandler(async (req, res) => {
+    const { channelId } = req.params;
+
+    if (!mongoose.isValidObjectId(channelId)) {
+        throw new ApiError(400, "Invalid channel id");
+    }
+
+    const tweets = await Tweet.find({ uploadedBy: channelId });
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                tweets,
+                "Channel tweets fetched successfully"
+            )
+        )
+})
+
 export {
     getChannelStats,
-    getChannelVideos
+    getChannelVideos,
+    getChannelTweets,
+    getChannelBooks
 }
