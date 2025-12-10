@@ -35,4 +35,4 @@ likeSchema.index({ tweet: 1, likedBy: 1 }, { unique: true });
 likeSchema.index({ book: 1, likedBy: 1 }, { unique: true });
 
 
-export const Likes = mongoose.model("Likes", likeSchema);
+export const Like = mongoose.model("Like", likeSchema);
